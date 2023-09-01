@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { over } from "stompjs";
+import { Fieldset } from 'primereact/fieldset';
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
 import SockJS from "sockjs-client";
 
 var stompClient = null;
 const ChatRoom = () => {
   const [privateChats, setPrivateChats] = useState(new Map());
   const [publicChats, setPublicChats] = useState([]);
+
+
   const [tab, setTab] = useState("CHATROOM");
   const [userData, setUserData] = useState({
     username: "",
@@ -76,8 +81,11 @@ const ChatRoom = () => {
     console.log(err);
   };
 
+  const [isMessageValid, setIsMessageValid] = useState(true);
+
   const handleMessage = (event) => {
     const { value } = event.target;
+    setIsMessageValid(!!value);
     setUserData({ ...userData, message: value });
   };
   const sendValue = () => {
@@ -102,6 +110,7 @@ const ChatRoom = () => {
         status: "MESSAGE",
       };
 
+
       if (userData.username !== tab) {
         privateChats.get(tab).push(chatMessage);
         setPrivateChats(new Map(privateChats));
@@ -110,6 +119,22 @@ const ChatRoom = () => {
       setUserData({ ...userData, message: "" });
     }
   };
+
+  const verificaVazioPrivado = () => {
+    if (!userData.message || userData.message.trim() === "") {
+      console.log("ESTA VAZIO");// Adicione esta linha para definir a classe CSS
+    } else { // Redefina a classe CSS
+      sendPrivateValue();
+    }
+  };
+
+  const verificaVazioGeral = () => {
+
+    if (userData.message == "" || userData.message == null) {
+    } else {
+      sendValue();
+    }
+  }
 
   const handleUsername = (event) => {
     const { value } = event.target;
@@ -148,59 +173,82 @@ const ChatRoom = () => {
           </div>
           {tab === "CHATROOM" && (
             <div className="chat-content">
-              <ul className="chat-messages">
-                {publicChats.map((chat, index) => (
-                  <li className={`message`} key={index}>
-                    <div className="avatar">{chat.senderName}</div>
-                    <div className="message-data">{chat.message}</div>
-                  </li>
-                ))}
+              <ul>
+                <Fieldset className="chat-message" legend="Chatroom">
+                  <div className="scrollable-content">
+                    <ul className="chat-messages">
+                      {publicChats.map((chat, index) => (
+                        <li className={`message`} key={index}>
+                          <div className="avatar">{chat.senderName}</div>
+                          <div className="message-data">{chat.message}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </Fieldset>
+
               </ul>
 
-              <div className="send-message">
-                <input
-                  type="text"
-                  className="input-message"
-                  placeholder="enter the message"
+              <div className="">
+                <InputText type="text"
+                  className={`input-message ${!isMessageValid ? "p-invalid" : ""}`}
+                  placeholder="Insira a mensagem"
                   value={userData.message}
-                  onChange={handleMessage}
-                />
-                <button
+                  onChange={handleMessage} />
+                <Button
+                  label="Enviar"
                   type="button"
                   className="send-button"
-                  onClick={sendValue}
-                >
-                  send
-                </button>
+                  onClick={() => {
+                    if (!userData.message || userData.message.trim() === "") {
+                      setIsMessageValid(false);
+                    } else {
+                      setIsMessageValid(true);
+                      verificaVazioGeral();
+                    }
+                  }}
+                />
               </div>
             </div>
           )}
           {tab !== "CHATROOM" && (
             <div className="chat-content">
-              <ul className="chat-messages">
-                {[...privateChats.get(tab)].map((chat, index) => (
-                  <li className={`message`} key={index}>
-                    <div className="avatar">{chat.senderName}</div>
-                    <div className="message-data">{chat.message}</div>
-                  </li>
-                ))}
+              <ul >
+                <Fieldset className="chat-message" legend={userData.username}>
+                  <div className="scrollable-content">
+                    <ul className="chat-messages">
+                      {[...privateChats.get(tab)].map((chat, index) => (
+                        <li className={`message`} key={index}>
+                          <div className="avatar">{chat.senderName}</div>
+                          <div className="message-data">{chat.message}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </Fieldset>
+
               </ul>
 
-              <div className="send-message">
-                <input
-                  type="text"
-                  className="input-message"
-                  placeholder="enter the message"
+              <div className="">
+
+                <InputText type="text"
+                  className={`input-message ${!isMessageValid ? "p-invalid" : ""}`}
+                  placeholder="Insira a mensagem"
                   value={userData.message}
-                  onChange={handleMessage}
-                />
-                <button
+                  onChange={handleMessage} />
+                <Button
+                  label="Enviar"
                   type="button"
                   className="send-button"
-                  onClick={sendPrivateValue}
-                >
-                  send
-                </button>
+                  onClick={() => {
+                    if (!userData.message || userData.message.trim() === "") {
+                      setIsMessageValid(false);
+                    } else {
+                      setIsMessageValid(true);
+                      verificaVazioPrivado();
+                    }
+                  }}
+                />
               </div>
             </div>
           )}
@@ -208,17 +256,14 @@ const ChatRoom = () => {
         </div>
       ) : (
         <div className="register">
-          <input
-            id="user-name"
-            placeholder="Enter your name"
-            name="userName"
-            value={userData.username}
-            onChange={handleUsername}
-            margin="normal"
-          />
-          <button type="button" onClick={registerUser}>
-            connect
-          </button>
+          <Fieldset legend="Insira seu nome">
+            <InputText id="user-name"
+              placeholder="Insira seu nome"
+              name="userName"
+              value={userData.username}
+              onChange={handleUsername} />
+            <Button className="Button" label="Entrar" type="button" onClick={registerUser} />
+          </Fieldset>
         </div>
       )}
     </div>
