@@ -4,6 +4,8 @@ import { Fieldset } from 'primereact/fieldset';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import SockJS from "sockjs-client";
+import EmojiPicker from 'emoji-picker-react';
+
 
 var stompClient = null;
 const ChatRoom = () => {
@@ -122,8 +124,8 @@ const ChatRoom = () => {
 
   const verificaVazioPrivado = () => {
     if (!userData.message || userData.message.trim() === "") {
-      console.log("ESTA VAZIO");// Adicione esta linha para definir a classe CSS
-    } else { // Redefina a classe CSS
+      console.log("ESTA VAZIO");
+    } else { 
       sendPrivateValue();
     }
   };
@@ -148,29 +150,32 @@ const ChatRoom = () => {
     <div className="container">
       {userData.connected ? (
         <div className="chat-box">
-          <div className="member-list">
-            <ul>
-              <li
-                onClick={() => {
-                  setTab("CHATROOM");
-                }}
-                className={`member ${tab === "CHATROOM" && "active"}`}
-              >
-                Chatroom
-              </li>
-              {[...privateChats.keys()].map((name, index) => (
+          <Fieldset className="member-list" legend={'Lista de Chats'}>
+            <div className="a">
+              <ul>
                 <li
                   onClick={() => {
-                    setTab(name);
+                    setTab("CHATROOM");
                   }}
-                  className={`member ${tab === name && "active"}`}
-                  key={index}
+                  className={`member ${tab === "CHATROOM" && "active"}`}
                 >
-                  {name}
+                  Chatroom
                 </li>
-              ))}
-            </ul>
-          </div>
+                {[...privateChats.keys()].map((name, index) => (
+                  <li
+                    onClick={() => {
+                      setTab(name);
+                    }}
+                    className={`member ${tab === name && "active"}`}
+                    key={index}
+                  >
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Fieldset>
+
           {tab === "CHATROOM" && (
             <div className="chat-content">
               <ul>
@@ -178,23 +183,49 @@ const ChatRoom = () => {
                   <div className="scrollable-content">
                     <ul className="chat-messages">
                       {publicChats.map((chat, index) => (
-                        <li className={`message`} key={index}>
-                          <div className="avatar">{chat.senderName}</div>
-                          <div className="message-data">{chat.message}</div>
+                        <li
+                          className={`message ${chat.senderName === userData.username ? "user-message" : ""}`}
+                          key={index}
+                        >
+                          {chat.senderName !== userData.username && (
+                            <div className={`avatar ${chat.senderName === userData.username ? "user-avatar" : ""}`}>
+                              {chat.senderName}
+                            </div>
+                          )}
+                          <div className={`message-data ${chat.senderName === userData.username ? "user-data" : ""}`}>
+                            {chat.message}
+                          </div>
+                          {chat.senderName === userData.username && (
+                            <div className={`avatar ${chat.senderName === userData.username ? "user-avatar" : ""}`}>
+                              {chat.senderName}
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>
                   </div>
                 </Fieldset>
-
               </ul>
+
+
 
               <div className="">
                 <InputText type="text"
                   className={`input-message ${!isMessageValid ? "p-invalid" : ""}`}
                   placeholder="Insira a mensagem"
                   value={userData.message}
-                  onChange={handleMessage} />
+                  onChange={handleMessage} 
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault(); 
+                      if (!isMessageValid) {
+                        setIsMessageValid(false);
+                      } else {
+                        verificaVazioGeral();
+                      }
+                    }
+                  }}
+                />
                 <Button
                   label="Enviar"
                   type="button"
@@ -219,7 +250,9 @@ const ChatRoom = () => {
                     <ul className="chat-messages">
                       {[...privateChats.get(tab)].map((chat, index) => (
                         <li className={`message`} key={index}>
-                          <div className="avatar">{chat.senderName}</div>
+                          <div className={`avatar ${chat.senderName === userData.username ? "user-avatar" : ""}`}>
+                            {chat.senderName}
+                          </div>
                           <div className="message-data">{chat.message}</div>
                         </li>
                       ))}
@@ -230,12 +263,22 @@ const ChatRoom = () => {
               </ul>
 
               <div className="">
-
                 <InputText type="text"
                   className={`input-message ${!isMessageValid ? "p-invalid" : ""}`}
                   placeholder="Insira a mensagem"
                   value={userData.message}
-                  onChange={handleMessage} />
+                  onChange={handleMessage} 
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault(); 
+                      if (!isMessageValid) {
+                        setIsMessageValid(false);
+                      } else {
+                        verificaVazioGeral();
+                      }
+                    }
+                  }}
+                />
                 <Button
                   label="Enviar"
                   type="button"
@@ -257,13 +300,31 @@ const ChatRoom = () => {
       ) : (
         <div className="register">
           <Fieldset legend="Insira seu nome">
-            <InputText id="user-name"
+            <InputText
+              id="user-name"
+              className={` ${!isMessageValid ? "p-invalid" : ""}`}
               placeholder="Insira seu nome"
               name="userName"
               value={userData.username}
-              onChange={handleUsername} />
-            <Button className="Button" label="Entrar" type="button" onClick={registerUser} />
+              onChange={handleUsername}
+            />
+            
+            <Button
+              className="Button"
+              label="Entrar"
+              type="button"
+              onClick={() => {
+                if (!userData.username || userData.username.trim() === "") {
+                  setIsMessageValid(false);
+                } else {
+                  setIsMessageValid(true);
+                  verificaVazioPrivado();
+                  registerUser();
+                }
+              }}
+            />
           </Fieldset>
+
         </div>
       )}
     </div>

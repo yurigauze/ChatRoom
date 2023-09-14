@@ -54,9 +54,13 @@ button{
   display: flex;
   flex-direction: row;
 }
+.p-fieldset .p-fieldset-content{
+  padding: none;
+}
 
 .member-list{
   width: 20%;
+  margin-top: 15px;
 }
 
 .chat-content{
@@ -75,10 +79,9 @@ button{
 
 .scrollable-content {
   max-height: 40vh;
-  /* Defina a altura máxima para a área de rolagem */
   overflow-y: auto;
     outline:  none;
-  /* Adicione uma barra de rolagem vertical quando necessário */
+
 }
 
 
@@ -116,7 +119,7 @@ li {
   box-shadow: 0 8px 8px -4px lightblue;
 }
 .member.active{
-  background: blueviolet;
+  background: rgba(79,70,229,255);
   color:#fff;
 }
 .member:hover{
@@ -125,11 +128,35 @@ li {
 }
 
 .avatar{
-  background-color: cornflowerblue;
+  background-color: rgb(36, 105, 235);
   padding: 3px 5px;
   border-radius: 5px;
   color:#fff;
 }
+
+.user-message {
+  display: flex;
+  flex-direction: row-reverse; 
+  justify-content: flex-end;
+}
+
+.user-avatar {
+  order: 2; 
+  align-self: flex-end;
+}
+
+.user-data {
+  order: 1; 
+  align-self: flex-end;
+}
+
+.user-avatar {
+  background-color: rgba(79,70,229,255); 
+  align-content: end;
+    padding: 3px 5px;
+  border-radius: 5px;
+}
+
 .avatar.self{
   color:#000;
   background-color: greenyellow;
